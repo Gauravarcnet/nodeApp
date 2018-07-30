@@ -1,6 +1,7 @@
 var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
+var favicon = require('serve-favicon');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
@@ -24,30 +25,38 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser('12345-67890-09876-54321'));// here we are using signed cookin so passing a sceret key in cookie pareser
 
 function auth(req,res,next){
-  console.log(req.headers);
-  var authHeader=req.headers.authorization;
+  console.log(req.signedCookies);
+  if (!req.signedCookies.user) {
+    var authHeader=req.headers.authorization;
 
-  if(!authHeader){
+    if(!authHeader){
+        var err =new Error('You are not authenticated');
+        res.setHeader('Www-Authenticate','Basic');
+        err.status=401;
+        return next(err);
+    }
+    var auth=new Buffer(authHeader.split(' ')[1],'base64').toString().split(':');
+    var username=auth[0];
+    var password=auth[1];
+    if(username ==='admin' && password ==='password'){
+      res.cookie('user','admin',{signed:true});   // setting signed cookie after first authorization
+      next();
+    }else{
+      console.log("bye");
       var err =new Error('You are not authenticated');
       res.setHeader('Www-Authenticate','Basic');
       err.status=401;
       return next(err);
-  }
-  var auth=new Buffer(authHeader.split(' ')[1],'base64').toString().split(':');
-  var username=auth[0];
-  var password=auth[1];
-  if(username ==='admin' && password ==='password'){
-    console.log("hi ");
-    next();
+    }
   }else{
-    console.log("bye");
-    var err =new Error('You are not authenticated');
-    res.setHeader('Www-Authenticate','Basic');
-    err.status=401;
-    return next(err);
+    if (req.signedCookies.user=='admin') {
+      next();
+    }else{
+      var err =new Error('You are not authenticated');
+      err.status=401;
+      return next(err);
+    }
   }
-
-
 }
 
 app.use(auth);
