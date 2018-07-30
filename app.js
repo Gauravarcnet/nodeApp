@@ -4,7 +4,8 @@ var path = require('path');
 var favicon = require('serve-favicon');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-
+var session = require('express-session'); // importing session module
+var FileStore = require('session-file-store')(session); passing session variable as parameter in filestore
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var promoRouter = require('./routes/promoRouter');
@@ -22,11 +23,17 @@ app.set('view engine', 'jade');
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser('12345-67890-09876-54321'));// here we are using signed cookin so passing a sceret key in cookie pareser
-
+// app.use(cookieParser('12345-67890-09876-54321'));// here we are using signed cookin so passing a sceret key in cookie pareser
+app.use(session({       // using session
+  name:'session-id',
+  secret:'12345-67890-09876-54321',
+  resave:false,
+  saveUninitialized:false,
+  store:new FileStore()
+}));
 function auth(req,res,next){
-  console.log(req.signedCookies);
-  if (!req.signedCookies.user) {
+  console.log(req.session);
+  if (!req.session.user) {
     var authHeader=req.headers.authorization;
 
     if(!authHeader){
@@ -39,7 +46,8 @@ function auth(req,res,next){
     var username=auth[0];
     var password=auth[1];
     if(username ==='admin' && password ==='password'){
-      res.cookie('user','admin',{signed:true});   // setting signed cookie after first authorization
+      // res.cookie('user','admin',{signed:true});   // setting signed cookie after first authorization
+      req.  session.user='admin';
       next();
     }else{
       console.log("bye");
@@ -49,7 +57,7 @@ function auth(req,res,next){
       return next(err);
     }
   }else{
-    if (req.signedCookies.user=='admin') {
+    if (req.session.user=='admin') {
       next();
     }else{
       var err =new Error('You are not authenticated');
