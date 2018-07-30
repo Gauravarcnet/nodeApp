@@ -1,5 +1,4 @@
 {
-<<<<<<< HEAD
   "name": "confusionserver",
   "version": "0.0.0",
   "private": true,
@@ -7,24 +6,17 @@
     "start": "node ./bin/www"
   },
   "dependencies": {
+    "bluebird": "^3.5.1",
     "cookie-parser": "~1.4.3",
     "debug": "~2.6.9",
     "express": "~4.16.0",
     "http-errors": "~1.6.2",
     "jade": "~1.11.0",
+    "mongoose": "^5.2.5",
+    "mongoose-currency": "^0.2.0",
     "morgan": "~1.9.0"
-  }
-=======
-  "name": "node_examples",
-  "version": "1.0.0",
-  "description": "simple node examples",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index"
-
   },
+  "main": "index.js",
   "author": "Gaurav bansal",
   "license": "ISC"
->>>>>>> 771d862bf38096990dca0c978279dd2ce9708d39
 }
